@@ -54,3 +54,46 @@ int main() {
     return 0;
 }
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define TAM_FILA 5
+
+// Representa um bloco do jogo
+struct bloco {
+    char formato;
+    int codigo;
+};
+
+// Representa a fila circular de blocos
+struct fila_blocos {
+    struct bloco lista[TAM_FILA];
+    int posInicio;
+    int posFim;
+    int quantidade;
+};
+
+int gerador_codigo = 0;
+
+// Cria um bloco aleatório
+struct bloco gerar_bloco() {
+    struct bloco novoBloco;
+    char formatos[] = {'I', 'O', 'T', 'L'};
+    
+    novoBloco.formato = formatos[rand() % 4];
+    novoBloco.codigo = gerador_codigo;
+    gerador_codigo++;
+    
+    return novoBloco;
+}
+
+// Inicializa a fila
+void inicializar_fila(struct fila_blocos *fila) {
+    fila->posInicio = 0;
+    fila->posFim = 0;
+    fila->quantidade = 0;
+    
+    int i;
+    for (i = 0; i < TAM_FILA; i++) {
+        fila->lista[fila->p]()
