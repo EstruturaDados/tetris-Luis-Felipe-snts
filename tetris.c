@@ -1,60 +1,4 @@
 #include <stdio.h>
-
-// Desafio Tetris Stack
-// Tema 3 - Integração de Fila e Pilha
-// Este código inicial serve como base para o desenvolvimento do sistema de controle de peças.
-// Use as instruções de cada nível para desenvolver o desafio.
-
-int main() {
-
-    // 🧩 Nível Novato: Fila de Peças Futuras
-    //
-    // - Crie uma struct Peca com os campos: tipo (char) e id (int).
-    // - Implemente uma fila circular com capacidade para 5 peças.
-    // - Crie funções como inicializarFila(), enqueue(), dequeue(), filaCheia(), filaVazia().
-    // - Cada peça deve ser gerada automaticamente com um tipo aleatório e id sequencial.
-    // - Exiba a fila após cada ação com uma função mostrarFila().
-    // - Use um menu com opções como:
-    //      1 - Jogar peça (remover da frente)
-    //      0 - Sair
-    // - A cada remoção, insira uma nova peça ao final da fila.
-
-
-
-    // 🧠 Nível Aventureiro: Adição da Pilha de Reserva
-    //
-    // - Implemente uma pilha linear com capacidade para 3 peças.
-    // - Crie funções como inicializarPilha(), push(), pop(), pilhaCheia(), pilhaVazia().
-    // - Permita enviar uma peça da fila para a pilha (reserva).
-    // - Crie um menu com opção:
-    //      2 - Enviar peça da fila para a reserva (pilha)
-    //      3 - Usar peça da reserva (remover do topo da pilha)
-    // - Exiba a pilha junto com a fila após cada ação com mostrarPilha().
-    // - Mantenha a fila sempre com 5 peças (repondo com gerarPeca()).
-
-
-    // 🔄 Nível Mestre: Integração Estratégica entre Fila e Pilha
-    //
-    // - Implemente interações avançadas entre as estruturas:
-    //      4 - Trocar a peça da frente da fila com o topo da pilha
-    //      5 - Trocar os 3 primeiros da fila com as 3 peças da pilha
-    // - Para a opção 4:
-    //      Verifique se a fila não está vazia e a pilha tem ao menos 1 peça.
-    //      Troque os elementos diretamente nos arrays.
-    // - Para a opção 5:
-    //      Verifique se a pilha tem exatamente 3 peças e a fila ao menos 3.
-    //      Use a lógica de índice circular para acessar os primeiros da fila.
-    // - Sempre valide as condições antes da troca e informe mensagens claras ao usuário.
-    // - Use funções auxiliares, se quiser, para modularizar a lógica de troca.
-    // - O menu deve ficar assim:
-    //      4 - Trocar peça da frente com topo da pilha
-    //      5 - Trocar 3 primeiros da fila com os 3 da pilha
-
-
-    return 0;
-}
-
-#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -96,4 +40,119 @@ void inicializar_fila(struct fila_blocos *fila) {
     
     int i;
     for (i = 0; i < TAM_FILA; i++) {
-        fila->lista[fila->p]()
+        fila->lista[fila->posFim] = gerar_bloco();
+        fila->posFim = (fila->posFim + 1) % TAM_FILA;
+        fila->quantidade++;
+    }
+}
+
+// Verifica se está vazia
+int fila_vazia(struct fila_blocos *fila) {
+    return fila->quantidade == 0;
+}
+
+// Verifica se está cheia
+int fila_cheia(struct fila_blocos *fila) {
+    return fila->quantidade == TAM_FILA;
+}
+
+// Remove bloco da fila
+struct bloco obter_bloco(struct fila_blocos *fila) {
+    struct bloco retirado;
+    
+    if (fila_vazia(fila)) {
+        printf("Nenhum bloco disponível!\n");
+        retirado.formato = '?';
+        retirado.codigo = -1;
+        return retirado;
+    }
+    
+    retirado = fila->lista[fila->posInicio];
+    fila->posInicio = (fila->posInicio + 1) % TAM_FILA;
+    fila->quantidade--;
+    
+    return retirado;
+}
+
+// Insere bloco novo
+int inserir_bloco(struct fila_blocos *fila) {
+    if (fila_cheia(fila)) {
+        printf("Fila cheia! Não é possível adicionar agora.\n");
+        return 0;
+    }
+    
+    fila->lista[fila->posFim] = gerar_bloco();
+    fila->posFim = (fila->posFim + 1) % TAM_FILA;
+    fila->quantidade++;
+    
+    return 1;
+}
+
+// Exibe a fila atual
+void exibir_fila(struct fila_blocos *fila) {
+    printf("\n-- Próximos blocos --\n");
+    
+    if (fila_vazia(fila)) {
+        printf("A fila está vazia!\n");
+        return;
+    }
+    
+    int pos = fila->posInicio;
+    int i;
+    for (i = 0; i < fila->quantidade; i++) {
+        printf("[%c %d] ", fila->lista[pos].formato, fila->lista[pos].codigo);
+        pos = (pos + 1) % TAM_FILA;
+    }
+    printf("\n");
+}
+
+// Menu principal
+void menu() {
+    printf("\nSelecione uma ação:\n");
+    printf("1 - Usar próximo bloco\n");
+    printf("2 - Adicionar novo bloco\n");
+    printf("0 - Encerrar\n");
+    printf("Opção: ");
+}
+
+int main() {
+    struct fila_blocos filaPrincipal;
+    int escolha;
+    struct bloco retirado;
+    
+    srand(time(NULL));
+    
+    inicializar_fila(&filaPrincipal);
+    
+    printf("======= GERENCIADOR DE BLOCOS - TETRIS =======\n");
+    printf("Controle a fila de blocos do jogo.\n");
+    
+    while (1) {
+        exibir_fila(&filaPrincipal);
+        menu();
+        scanf("%d", &escolha);
+        
+        if (escolha == 1) {
+            retirado = obter_bloco(&filaPrincipal);
+            if (retirado.codigo >= 0) {
+                printf("Bloco utilizado: [%c %d]\n", retirado.formato, retirado.codigo);
+            }
+        } 
+        else if (escolha == 2) {
+            if (inserir_bloco(&filaPrincipal)) {
+                printf("Novo bloco inserido!\n");
+            }
+        }
+        else if (escolha == 0) {
+            printf("Encerrando programa. Até logo!\n");
+            break;
+        }
+        else {
+            printf("Opção inválida! Tente novamente.\n");
+        }
+        
+        printf("\n");
+    }
+    
+    return 0;
+}
